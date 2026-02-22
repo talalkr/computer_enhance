@@ -1,8 +1,10 @@
 # Instruction Decoding
 
 A partial 8086 emulator: reads the binary file and disassemble it to match the original source assembly.\
-This module assumes the binary files only contains the mov opcode for the following mods: Immediate-To-Register, Reg-To-Reg, Immediate-to-R-8Bits, Immediate-to-R-16Bits, SA-Cal, SA-Cal-8Bit, SA-Cal-16Bits, Dest Address Cal
-
+This module assumes the binary files only contains the:
+- mov/add/sub/cmp opcode for the following mods: Immediate-To-Register, Reg-To-Reg, Immediate-to-R-8Bits, Immediate-to-R-16Bits, SA-Cal, SA-Cal-8Bit, SA-Cal-16Bits, Dest Address Cal
+- add/sub/cmp additionally for the following mod: Immediate-To-Accumulator
+- jmps
 
 Step #1: run the examples and verify the assembly is correct by crosschecking it with the same listing numbers shown [here](https://github.com/cmuratori/computer_enhance/tree/main/perfaware/part1)
 ```bash
