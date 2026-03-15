@@ -75,11 +75,11 @@ def decode_with_mem(opc_name: str, asm_bytes: bytes) -> str:
     - Always pull first and second byte.
     - Third and fourth bytes are only pulled depending on MOD type.
     """
-    first_byte = bin(asm_bytes[0])[2:].zfill(8)
+    first_byte = format(asm_bytes[0], '08b')
     direction = first_byte[-2]
     word = first_byte[-1]
 
-    second_byte = bin(asm_bytes[1])[2:].zfill(8)
+    second_byte = format(asm_bytes[1], '08b')
 
     # Find REG 
     reg = second_byte[2:5]
@@ -116,7 +116,7 @@ def decode_mov_immediate(asm_bytes: bytes) -> str:
     - Pull one data byte if w = 0
     - Pull two data bytes if w = 1
     """
-    first_byte = bin(asm_bytes[0])[2:].zfill(8)
+    first_byte = format(asm_bytes[0], '08b')
     word = first_byte[4]
 
     reg = first_byte[5:]
@@ -141,8 +141,8 @@ def decode_arithmetic_immediate(asm_bytes: bytes) -> str:
     - Third and fourth bytes are only pulled depending on MOD type.
     - One data byte if s=1 (sign-extend) or w=0; two data bytes if s=0 and w=1.
     """
-    first_byte = bin(asm_bytes[0])[2:].zfill(8)
-    second_byte = bin(asm_bytes[1])[2:].zfill(8)
+    first_byte = format(asm_bytes[0], '08b')
+    second_byte = format(asm_bytes[1], '08b')
 
     word = first_byte[-1]
     mod = second_byte[:2]
@@ -195,7 +195,7 @@ def decode_arith_accumulator(asm_bytes: bytes) -> str:
     - Third byte is only pulled if w=1.
     - Destination is always the accumulator: AL if w=0, AX if w=1.
     """
-    first_byte = bin(asm_bytes[0])[2:].zfill(8)
+    first_byte = format(asm_bytes[0], '08b')
     word = first_byte[-1]
 
     opc_name = immediate_to_reg_name_map[first_byte[2:5]]
@@ -218,7 +218,7 @@ def decode_jump(asm_bytes: bytes) -> str:
     - Always pull two bytes: the opcode and a signed 8-bit offset.
     - Offset is relative to the next instruction (i.e. current instruction size + offset).
     """
-    first_byte = bin(asm_bytes[0])[2:].zfill(8)
+    first_byte = format(asm_bytes[0], '08b')
     opc_name = JUMP_OPCODES[first_byte]
     offset = asm_bytes[1]
     if offset & 0x80:
@@ -232,11 +232,11 @@ def decode_to_asm(asm_bytes: bytes) -> list[str]:
     i = 0
     instructions = []
     while i < len(asm_bytes):
-        instruction = bin(asm_bytes[i])[2:].zfill(8)
+        instruction = format(asm_bytes[i], '08b')
 
         # MOV/ADD/SUB/CMP from reg/memory to register
         if opc_name := opcode_to_name.get(instruction[:6], None):
-            second_byte = bin(asm_bytes[i+1])[2:].zfill(8)
+            second_byte = format(asm_bytes[i+1], '08b')
             mod = second_byte[:2]
             bytes_to_fetch = 2 + mod_bytes_to_fetch.get(mod)
             instructions.append(decode_with_mem(opc_name, asm_bytes[i:i+bytes_to_fetch]))
@@ -250,7 +250,7 @@ def decode_to_asm(asm_bytes: bytes) -> list[str]:
 
         # ADD/SUB/CMP immediate to register/memory
         elif instruction[:6] == ARITHMETIC_IMM_BIN:
-            second_byte = bin(asm_bytes[i+1])[2:].zfill(8)
+            second_byte = format(asm_bytes[i+1], '08b')
             mod = second_byte[:2]
             rm = second_byte[-3:]
             w = instruction[-1]
@@ -279,7 +279,7 @@ def decode_to_asm(asm_bytes: bytes) -> list[str]:
 
     return instructions
 
-def write_to_file(filename: str, data: str) -> None:
+def write_to_file(filename: str, data: list[str]) -> None:
     with open(file=filename, mode="w") as file:
         file.write("bits 16\n\n")
         file.write("\n".join(data))
